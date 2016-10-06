@@ -381,6 +381,11 @@
                     </configuration>
                 </plugin>
 
+                <plugin>
+                    <groupId>org.eclipse.cbi.maven.plugins</groupId>
+                    <artifactId>eclipse-jarsigner-plugin</artifactId>
+                    <version>1.1.3</version>
+                </plugin>
             </plugins>
         </pluginManagement>
 
@@ -627,6 +632,11 @@
             </activation>
             <build>
                 <plugins>
+                    <plugin>
+                        <groupId>org.eclipse.cbi.maven.plugins</groupId>
+                        <artifactId>eclipse-jarsigner-plugin</artifactId>
+                        <version>1.1.3</version>
+                    </plugin>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
