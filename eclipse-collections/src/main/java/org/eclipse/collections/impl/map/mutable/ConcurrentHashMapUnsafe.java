@@ -26,11 +26,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
+import java.util.function.Predicate;
 
 import org.eclipse.collections.api.block.function.Function;
 import org.eclipse.collections.api.block.function.Function0;
@@ -1589,11 +1591,8 @@ public class ConcurrentHashMapUnsafe<K, V>
 
         protected HashIterator()
         {
-            if (!ConcurrentHashMapUnsafe.this.isEmpty())
-            {
-                this.currentState = new IteratorState(ConcurrentHashMapUnsafe.this.table);
-                this.findNext();
-            }
+            this.currentState = new IteratorState(ConcurrentHashMapUnsafe.this.table);
+            this.findNext();
         }
 
         private void findNext()
@@ -1679,7 +1678,7 @@ public class ConcurrentHashMapUnsafe<K, V>
             ConcurrentHashMapUnsafe.this.remove(key);
         }
 
-        protected void removeByKeyValue()
+        protected boolean removeByKeyValue()
         {
             if (this.current == null)
             {
@@ -1688,7 +1687,7 @@ public class ConcurrentHashMapUnsafe<K, V>
             K key = this.current.key;
             V val = this.current.value;
             this.current = null;
-            ConcurrentHashMapUnsafe.this.remove(key, val);
+            return ConcurrentHashMapUnsafe.this.remove(key, val);
         }
     }
 
@@ -1803,6 +1802,22 @@ public class ConcurrentHashMapUnsafe<K, V>
         public Iterator<Map.Entry<K, V>> iterator()
         {
             return new EntryIterator();
+        }
+
+        @Override
+        public boolean removeIf(Predicate<? super Map.Entry<K, V>> filter)
+        {
+            Objects.requireNonNull(filter);
+            boolean removed = false;
+            final EntryIterator itr = new EntryIterator();
+            while (itr.hasNext())
+            {
+                if (filter.test(itr.next()))
+                {
+                    removed |= itr.removeByKeyValue();
+                }
+            }
+            return removed;
         }
 
         @Override
